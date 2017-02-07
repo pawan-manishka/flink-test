@@ -25,7 +25,6 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
     private AnalyticsDataService analyticsDataService;
     private AnalyticsIterator<Record> iterator;
 
-
     private int tenantId;
     private String tableName;
     private int numPartitionsHint;
@@ -34,8 +33,6 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
     private long timeTo;
     private int recordsFrom;
     private int recordsCount;
-
-    boolean reachedEnd = false;
 
 
     public void configure(Configuration parameters) {
@@ -47,55 +44,21 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
     }
 
     /*
-    * This method checks numPartitonHint and decide the no of splits need to be created
+    * This method decides the no of splits need to be created
     * */
     public DASInputSplit[] createInputSplits(int minNumSplits) throws IOException {
-            /// get the entries and create an array using that
+        /// get the entries and create an array using that
         try {
             analyticsDataResponse = analyticsDataService.get(tenantId, tableName, numPartitionsHint, columns, timeFrom, timeTo, recordsFrom, recordsCount);
-
         } catch (AnalyticsException e) {
             e.printStackTrace();
         }
-
-        
-
-
-
-
-
-
-        DASInputSplit s = new DASInputSplit("", minNumSplits);
-        DASInputSplit[] dasSplits= new DASInputSplit[]
-        for (int i = 0; i < dasSplits.length; i++) {
-            dasSplits[i] = new DASInputSplit();
+        List<Entry> entries = analyticsDataResponse.getEntries();
+        DASInputSplit[] splitsArr = new DASInputSplit[entries.size()];
+        for (int i = 0; i < splitsArr.length; i++) {
+            splitsArr[i] = new DASInputSplit(splitsArr.length);
         }
-
-        return dasSplits;
-
-
-/*        if(numPartitionsHint==0){
-            return new DASInputSplit[]{new DASInputSplit(entry)};
-        }
-        DASInputSplit[] dasSplits= new DASInputSplit[numPartitionsHint];
-        for (int i = 0; i < dasSplits.length; i++) {
-            dasSplits[i] = new DASInputSplit(entry);
-        }
-
-        return dasSplits;*/
-
-
-
-
-
-       /* if (numPartitionsHint == 0) {
-            return new DASInputSplit[]{new DASInputSplit(0, 1)};  // (noOfPartitions,totalNoOfPartitions)
-        }
-        DASInputSplit[] dasSplits = new DASInputSplit[numPartitionsHint];
-        for (int i = 0; i < dasSplits.length; i++) {
-            dasSplits[i] = new DASInputSplit(i, dasSplits.length);
-        }
-        return dasSplits;*/
+        return splitsArr;
     }
 
     public InputSplitAssigner getInputSplitAssigner(DASInputSplit[] inputSplits) {
@@ -106,12 +69,7 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
      * Read records in Input split
      * */
     public void open(DASInputSplit split) throws IOException {
-        try {
-            analyticsDataResponse = analyticsDataService.get(tenantId, tableName, numPartitionsHint, columns, timeFrom, timeTo, recordsFrom, recordsCount);
-            analyticsDataService.readRecords();
-        } catch (AnalyticsException e) {
-            e.printStackTrace();
-        }
+
         for (Entry entry : analyticsDataResponse.getEntries()) {
             RecordGroup recordGroup = entry.getRecordGroup();
             String recordstore = entry.getRecordStoreName();

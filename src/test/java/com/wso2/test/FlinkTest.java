@@ -58,24 +58,12 @@ public class FlinkTest {
 
     @Test
     public void myTest() throws Exception {
-        dasInputFormat.createInputSplits(1);
+//        dasInputFormat.createInputSplits(1);
 
         ExecutionEnvironment environment = ExecutionEnvironment.getExecutionEnvironment();
         dasInputFormat= DASInputFormat.buildDASInputFormat().setTenantId(11).setTableName("smwsi").setNumPartitionsHint(0)
                 .setColumns(null).setTimeFrom(1480574985).setTimeTo(1480576985).setRecordsFrom(10).setRecordsCount(20);
 
-
-
-       /* //dasInputFormat = DASInputFormat.buildDASInputFormat()
-                .setTenantId(11)
-                .setTableName("SMARTHOME_DATA")
-                .setNumPartitionsHint(2)
-                .setColumns(null)
-                .setTimeFrom(1480574985)
-                .setTimeTo(1480576985)
-                .setRecordsFrom(10)
-                .setRecordsCount(20);
-*/
         DataSet<Record> sourceRecords = environment.createInput(DASInputFormat.buildDASInputFormat());
        // sourceRecords.print();
     }

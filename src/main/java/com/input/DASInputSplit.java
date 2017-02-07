@@ -9,11 +9,10 @@ import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse.Entry
 public class DASInputSplit implements InputSplit {
 
     private Entry entry;
-    private int noOfSplits;
+    private int noOfEntries;
 
-    public DASInputSplit(Entry entry , int noOfSplits) {
-      this.entry = entry;
-      this.noOfSplits = noOfSplits;
+    public DASInputSplit(int noOfEntries) {
+      this.noOfEntries = noOfEntries;
     }
 
     public Entry getEntry() {
@@ -24,8 +23,9 @@ public class DASInputSplit implements InputSplit {
         this.entry = entry;
     }
 
+    // This will return the no of splits that is equal to no of entries
     public int getSplitNumber() {
-        return noOfSplits;
+        return noOfEntries;
     }
 
 }
