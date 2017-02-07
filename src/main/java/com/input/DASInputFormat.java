@@ -1,6 +1,7 @@
 package com.input;
 
 import org.apache.flink.api.common.io.InputFormat;
+import org.apache.flink.api.common.io.LocatableInputSplitAssigner;
 import org.apache.flink.api.common.io.statistics.BaseStatistics;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.core.io.GenericInputSplit;
@@ -56,7 +57,7 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
         List<Entry> entries = analyticsDataResponse.getEntries();
         DASInputSplit[] splitsArr = new DASInputSplit[entries.size()];
         for (int i = 0; i < splitsArr.length; i++) {
-            splitsArr[i] = new DASInputSplit(splitsArr.length);
+            splitsArr[i] = new DASInputSplit(analyticsDataResponse.getEntries(),splitsArr.length);
         }
         return splitsArr;
     }
@@ -69,16 +70,19 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
      * Read records in Input split
      * */
     public void open(DASInputSplit split) throws IOException {
-
-        for (Entry entry : analyticsDataResponse.getEntries()) {
-            RecordGroup recordGroup = entry.getRecordGroup();
-            String recordstore = entry.getRecordStoreName();
-            try {
-                iterator = analyticsDataService.readRecords(recordstore, recordGroup);
-                iterator.next();
-            } catch (AnalyticsException e) {
-                e.printStackTrace();
+        if (split != null) {
+            for (Entry entry : analyticsDataResponse.getEntries()) {
+                RecordGroup recordGroup = entry.getRecordGroup();
+                String recordstore = entry.getRecordStoreName();
+                try {
+                    iterator = analyticsDataService.readRecords(recordstore, recordGroup);
+                    iterator.next();
+                } catch (AnalyticsException e) {
+                    e.printStackTrace();
+                }
             }
+        }else {
+            throw new IllegalArgumentException("open() failed" );
         }
     }
 
