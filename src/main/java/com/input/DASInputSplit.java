@@ -1,10 +1,8 @@
 package com.input;
 
 import org.apache.flink.core.io.InputSplit;
-import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
 import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse.Entry;
 
-import java.util.List;
 
 /**
  * Created by pawan on 2/6/17.
@@ -12,12 +10,11 @@ import java.util.List;
 public class DASInputSplit implements InputSplit {
 
     private Entry entry;
-    private List<Entry> entries;
-    private int noOfEntries;
+    private int entryNo;
 
-    public DASInputSplit(List<Entry> entries,int noOfEntries) {
-        this.entries = entries;
-        this.noOfEntries = noOfEntries;
+    public DASInputSplit(Entry entry, int entryNo) {
+        this.entry = entry;
+        this.entryNo = entryNo;
     }
 
     public Entry getEntry() {
@@ -30,7 +27,7 @@ public class DASInputSplit implements InputSplit {
 
     // This will return the no of splits that is equal to no of entries
     public int getSplitNumber() {
-        return noOfEntries;
+        return entryNo;
     }
 
 }

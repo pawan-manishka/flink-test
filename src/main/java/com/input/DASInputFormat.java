@@ -1,14 +1,13 @@
 package com.input;
 
+import org.apache.flink.api.common.io.DefaultInputSplitAssigner;
 import org.apache.flink.api.common.io.InputFormat;
-import org.apache.flink.api.common.io.LocatableInputSplitAssigner;
 import org.apache.flink.api.common.io.statistics.BaseStatistics;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.core.io.GenericInputSplit;
 import org.apache.flink.core.io.InputSplitAssigner;
 import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse;
 import org.wso2.carbon.analytics.dataservice.commons.AnalyticsDataResponse.Entry;
-import org.wso2.carbon.analytics.dataservice.core.AnalyticsDataService;
+import org.wso2.carbon.analytics.dataservice.core.AnalyticsServiceHolder;
 import org.wso2.carbon.analytics.datasource.commons.AnalyticsIterator;
 import org.wso2.carbon.analytics.datasource.commons.Record;
 import org.wso2.carbon.analytics.datasource.commons.RecordGroup;
@@ -23,8 +22,8 @@ import java.util.List;
 public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
 
     private AnalyticsDataResponse analyticsDataResponse;
-    private AnalyticsDataService analyticsDataService;
     private AnalyticsIterator<Record> iterator;
+    //private Record nextRe;
 
     private int tenantId;
     private String tableName;
@@ -35,35 +34,50 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
     private int recordsFrom;
     private int recordsCount;
 
+    public DASInputFormat(int tenantId, String tableName, int numPartitionsHint, List<String> columns,
+                          long timeFrom, long timeTo, int recordsFrom, int recordsCount) {
+        this.tenantId = tenantId;
+        this.tableName = tableName;
+        this.columns = columns;
+        this.numPartitionsHint = numPartitionsHint;
+        this.timeFrom = timeFrom;
+        this.timeTo = timeTo;
+        this.recordsFrom = recordsFrom;
+        this.recordsCount = recordsCount;
+    }
 
     public void configure(Configuration parameters) {
         // do nothing here
     }
 
     public BaseStatistics getStatistics(BaseStatistics cachedStatistics) throws IOException {
-        return null;
+        return cachedStatistics;
     }
 
     /*
     * This method decides the no of splits need to be created
     * */
     public DASInputSplit[] createInputSplits(int minNumSplits) throws IOException {
-        /// get the entries and create an array using that
+        // get the entries and create an array using that
         try {
-            analyticsDataResponse = analyticsDataService.get(tenantId, tableName, numPartitionsHint, columns, timeFrom, timeTo, recordsFrom, recordsCount);
+            analyticsDataResponse = AnalyticsServiceHolder.getAnalyticsDataService().get(tenantId, tableName, numPartitionsHint,
+                    columns, timeFrom, timeTo, recordsFrom, recordsCount);
         } catch (AnalyticsException e) {
             e.printStackTrace();
         }
         List<Entry> entries = analyticsDataResponse.getEntries();
         DASInputSplit[] splitsArr = new DASInputSplit[entries.size()];
+
         for (int i = 0; i < splitsArr.length; i++) {
-            splitsArr[i] = new DASInputSplit(analyticsDataResponse.getEntries(),splitsArr.length);
+            splitsArr[i] = new DASInputSplit(entries.get(i), i);
         }
         return splitsArr;
     }
 
+
     public InputSplitAssigner getInputSplitAssigner(DASInputSplit[] inputSplits) {
-        return null;
+        System.err.println("split assigner");
+        return new DefaultInputSplitAssigner(inputSplits);
     }
 
     /*
@@ -71,18 +85,17 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
      * */
     public void open(DASInputSplit split) throws IOException {
         if (split != null) {
-            for (Entry entry : analyticsDataResponse.getEntries()) {
-                RecordGroup recordGroup = entry.getRecordGroup();
-                String recordstore = entry.getRecordStoreName();
-                try {
-                    iterator = analyticsDataService.readRecords(recordstore, recordGroup);
-                    iterator.next();
-                } catch (AnalyticsException e) {
-                    e.printStackTrace();
-                }
+            System.err.println("open split");
+            RecordGroup recordGroup = split.getEntry().getRecordGroup();
+            String recordStore = split.getEntry().getRecordStoreName();
+            try {
+                iterator = AnalyticsServiceHolder.getAnalyticsDataService().readRecords(recordStore, recordGroup);
+            } catch (AnalyticsException e) {
+                e.printStackTrace();
             }
-        }else {
-            throw new IllegalArgumentException("open() failed" );
+
+        } else {
+            throw new IllegalArgumentException("open() failed");
         }
     }
 
@@ -90,10 +103,8 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
     * Checks whether all data has been read.
     * */
     public boolean reachedEnd() throws IOException {
-        if (!iterator.hasNext()) {
-            return false;
-        }
-        return true;
+        System.err.println("end: " + iterator.hasNext());
+        return (!iterator.hasNext());
     }
 
     public Record nextRecord(Record reuse) throws IOException {
@@ -101,19 +112,21 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
     }
 
     public void close() throws IOException {
-
     }
+
+}
+
 
     /**
      * A builder used to set parameters to the output format's configuration in a fluent way.
      *
      * @return builder
      */
-    public static DASInputFormatBuilder buildDASInputFormat() {
+   /* public static DASInputFormatBuilder buildDASInputFormat() {
         return new DASInputFormatBuilder();
-    }
+    }*/
 
-    public static class DASInputFormatBuilder extends DASInputFormat {
+   /* public static class DASInputFormatBuilder extends DASInputFormat {
         // set those input values to com.input.DASInputFormat attributes
         private final DASInputFormat format;
 
@@ -163,3 +176,4 @@ public class DASInputFormat implements InputFormat<Record, DASInputSplit> {
 
     }
 }
+*/

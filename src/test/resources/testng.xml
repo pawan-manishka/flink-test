@@ -6,7 +6,7 @@
             <!--<class name="org.wso2.carbon.analytics.datasource.rdbms.mysql.MySQLAnalyticsRecordStoreTest"/>-->
             <!--<class name="org.wso2.carbon.analytics.datasource.rdbms.mysql.MySQLAnalyticsDataServiceTest"/>-->
             <class name="com.wso2.test.FlinkTest"/>
-
+            <class name="com.wso2.test.DASInputFormatTest"/>
             <!--class name="org.wso2.carbon.analytics.datasource.rdbms.AnalyticsSparkSQLTest"/-->
             <!--class name="org.wso2.carbon.analytics.datasource.rdbms.AnalyticsSparkSQLUITest"/-->
             <!--<class name="org.wso2.carbon.analytics.datasource.rdbms.oracle.OracleAnalyticsRecordStoreTest"/>-->
