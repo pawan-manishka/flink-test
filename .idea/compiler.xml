@@ -22,11 +22,11 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
-        <module name="flink-test" />
+        <module name="com.flink.test" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="flink-test" target="1.6" />
+      <module name="com.flink.test" target="1.6" />
     </bytecodeTargetLevel>
   </component>
 </project>

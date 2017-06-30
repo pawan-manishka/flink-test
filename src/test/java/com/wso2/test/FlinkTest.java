@@ -6,7 +6,6 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 import org.wso2.carbon.analytics.dataservice.core.AnalyticsDataService;
 import org.wso2.carbon.analytics.dataservice.core.AnalyticsServiceHolder;
 import org.wso2.carbon.analytics.datasource.commons.*;
@@ -20,8 +19,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.wso2.carbon.analytics.datasource.core.AnalyticsRecordStoreTest.generateRecords;
 
 /**
  * Created by pawan on 2/3/17.
@@ -108,44 +105,14 @@ public class FlinkTest {
         ExecutionEnvironment environment = ExecutionEnvironment.getExecutionEnvironment();
         DASInputFormat dasInputFormat = new DASInputFormat(1, "SAMPLETABLE1", 2, null, Long.MIN_VALUE, Long.MAX_VALUE, 0, -1);
         DataSet<Record> dasRecords = environment.createInput(dasInputFormat);
+
         List<Record> res = dasRecords.collect();
-
-
         System.out.println("*XXXXXXXX: " + res.size());
         dasRecords.print();
 
-        service.createTable(7, "Output1");
-        long time = System.currentTimeMillis();
-        int timeOffset = 10;
-        List<Record> records1 = generateRecords(7, "Output1", 2, 200, time, timeOffset);
-        AnalyticsServiceHolder.getAnalyticsDataService().put(records1);
-
-       /* DASOutputFormat dasOutputFormat = new DASOutputFormat(records);
-        dasRecords.output(dasOutputFormat);*/
-
-        //AnalyticsServiceHolder.getAnalyticsDataService().put(res);
-
-
-        // long i=dasRecords.count();
-        //dasRecords.count();
-        //environment.execute();
         System.out.println("dasReords execution");
         service.deleteTable(tenantId, table1);
         service.deleteTable(tenantId, table2);
 
-        /*
-        AnalyticsDataResponse analyticsDataResponse = AnalyticsServiceHolder.getAnalyticsDataService().get(1,"SampleTable1",1, null ,Long.MIN_VALUE, Long.MAX_VALUE, 0,-1 );
-        for (AnalyticsDataResponse.Entry entry : analyticsDataResponse.getEntries()) {
-            recordGroup = entry.getRecordGroup();
-            recordstore = entry.getRecordStoreName();
-        }
-        iterator = AnalyticsServiceHolder.getAnalyticsDataService().readRecords(recordstore,recordGroup);
-        int count =0;
-        while(iterator.hasNext()) {
-           System.out.println(iterator.next().toString());
-            //System.out.println(iterator.next().getValues());
-            count ++;
-        }
-        System.out.println(count);*/
     }
 }
